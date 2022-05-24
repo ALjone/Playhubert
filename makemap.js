@@ -32,6 +32,20 @@ return {
 };}
 
 function initMap() {
+    document.getElementById("size").style.display = 'none';
+    document.getElementById("mapsizelabel").style.display = 'none';
+    document.getElementById("submit-input").style.display = 'none';
+
+    document.getElementById("sendmap").style.display = 'block';
+    document.getElementById("checkboxlabelsend").style.display = 'block';
+
+    document.getElementById("downloadmap").style.display = 'block';
+    document.getElementById("checkboxlabeldownload").style.display = 'block';
+
+    document.getElementById("mapname").style.display = 'block';
+    document.getElementById("mapnamelabel").style.display = 'block';
+
+
     snakeboard = document.getElementById("gameCanvas");
     snakeboard_ctx = gameCanvas.getContext("2d");
     size = document.getElementById("size").value;
@@ -77,13 +91,34 @@ function drawMap(){
 }
 
 //https://stackoverflow.com/questions/14964035/how-to-export-javascript-array-info-to-csv-on-client-side
-function save() {
-    let csvContent = "data:text/csv;charset=utf-8,";
+async function save() {
+    let csvContent = "";
     var transposed = map[0].map((_, colIndex) => map.map(row => row[colIndex]));
     transposed.forEach(function(rowArray) {
         let row = rowArray.join("\t");
         csvContent += row + "\r\n";
     });
-    var encodedUri = encodeURI(csvContent);
-    window.open(encodedUri);
+    var mapname = document.getElementById("mapname").value;
+
+    
+    if (document.getElementById("sendmap").checked) {
+        console.log("Sent to server.")
+        var result = await fetch("http://localhost:8000/", {
+            method: "POST",
+            headers: {'Content-Type' : 'application/json'},
+            body: JSON.stringify({data: csvContent, name: mapname})
+            }).then(result => result.json()).then(data => {return data})
+
+        if (result == "invalid_filename") {
+            window.alert("Invalid filename. Please try again.")
+        }
+    }
+    if (document.getElementById("downloadmap").checked) {
+        console.log("Downloaded the map")
+        var encodedUri = encodeURI("data:text/csv;charset=utf-8,"+csvContent);
+        window.open(encodedUri);
+    }
+    if (!document.getElementById("downloadmap").checked && !document.getElementById("sendmap").checked) {
+        window.alert("Please check at least one of the boxes!")
+    }
 }

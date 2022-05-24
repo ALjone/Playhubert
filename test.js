@@ -84,15 +84,9 @@ function save() {
         let row = rowArray.join("\t");
         csvContent += row + "\n";
     });
-
-    console.log("Sending", JSON.stringify(csvContent))
-    csvContent = {data: csvContent}
     fetch("http://localhost:8000/", {
         method: "POST",
-        mode: 'no-cors',
-        body: JSON.stringify(csvContent),
-        headers: {
-            'Content-Type': 'application/json' // The type of data you're sending
-        }
+        headers: {'Content-Type' : 'application/json'},
+        body: JSON.stringify({data: csvContent})
     })
 }
